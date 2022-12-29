@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace IdentityProvider.Dtos;
 
-public class LoginDto
+public class DeleteDto
 {
     [Required]
     public string Email { get; set; } = null!;

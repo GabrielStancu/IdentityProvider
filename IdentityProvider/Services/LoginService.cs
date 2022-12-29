@@ -1,3 +1,4 @@
+using AutoMapper;
 using IdentityProvider.Dtos;
 using Microsoft.AspNetCore.Identity;
 
@@ -12,35 +13,51 @@ public class LoginService : ILoginService
 {
     private readonly UserManager<IdentityUser> _userManager;
     private readonly SignInManager<IdentityUser> _signInManager;
+    private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ITokenService _tokenService;
+    private readonly IMapper _mapper;
 
     public LoginService(
         UserManager<IdentityUser> userManager,
         SignInManager<IdentityUser> signInManager,
-        ITokenService tokenService)
+        RoleManager<IdentityRole> roleManager,
+        ITokenService tokenService,
+        IMapper mapper)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _roleManager = roleManager;
         _tokenService = tokenService;
+        _mapper = mapper;
     }
 
     public async Task<UserDto?> LoginAsync(LoginDto loginDto)
     {
+        // Check the user exists
         var user = await _userManager.FindByEmailAsync(loginDto.Email);
-
         if (user == null)
             return null;
 
+        // Check the password
         var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);
-
         if (!result.Succeeded)
+            return null;
+
+        // Get the user role name and validate it
+        var roleName = (await _userManager.GetRolesAsync(user)).FirstOrDefault();
+        if (string.IsNullOrEmpty(roleName))
+            return null;
+
+        // Get the user role and validate it
+        var role = await _roleManager.FindByNameAsync(roleName);
+        if (role is null || string.IsNullOrEmpty(role.Name))
             return null;
 
         return new UserDto
         {
             Email = user.Email!,
-            //TODO: get the role for the "?" placeholder below
-            Token = _tokenService.CreateToken(user, "?")
+            Token = _tokenService.CreateToken(user, role.Name),
+            Role = _mapper.Map<RoleDto>(role)
         };
     }
 }

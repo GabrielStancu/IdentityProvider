@@ -2,6 +2,7 @@ namespace IdentityProvider.Dtos;
 
 public class UserDto
 {
-    public string Email { get; set; } = string.Empty;
-    public string  Token { get; set; } = string.Empty;
+    public string Email { get; set; } = null!;
+    public string Token { get; set; } = null!;
+    public RoleDto Role { get; set; } = null!;
 }
