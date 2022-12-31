@@ -63,6 +63,7 @@ public class AuthenticationService : IAuthenticationService
         // Create return object
         var registeredUser = new UserDto
         {
+            Id = user.Id,
             Token = _tokenService.CreateToken(user, registerDto.RoleId),
             Email = user.Email,
             Role = _mapper.Map<RoleDto>(role)

@@ -55,6 +55,7 @@ public class LoginService : ILoginService
 
         return new UserDto
         {
+            Id = user.Id,
             Email = user.Email!,
             Token = _tokenService.CreateToken(user, role.Name),
             Role = _mapper.Map<RoleDto>(role)
