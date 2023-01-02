@@ -1,11 +1,10 @@
 namespace IdentityProvider.Dtos;
 
-public class UserDto
+public class UserInfoDto
 {
     public string Id { get; set; } = null!;
     public string Email { get; set; } = null!;
     public string FirstName { get; set; } = null!;
     public string LastName { get; set; } = null!;
-    public string Token { get; set; } = null!;
-    public RoleDto Role { get; set; } = null!;
+    public string RoleName { get; set; } = null!;
 }

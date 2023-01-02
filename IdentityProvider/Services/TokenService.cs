@@ -1,6 +1,7 @@
 using System.IdentityModel.Tokens.Jwt;
 using System.Security.Claims;
 using System.Text;
+using IdentityProvider.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.IdentityModel.Tokens;
 
@@ -8,7 +9,7 @@ namespace IdentityProvider.Services;
 
 public interface ITokenService
 {
-    public string CreateToken(IdentityUser user, string roleName);
+    public string CreateToken(AppUser user, string roleName);
 }
 
 public class TokenService : ITokenService
@@ -24,7 +25,7 @@ public class TokenService : ITokenService
         _key = new SymmetricSecurityKey(key);
     }
 
-    public string CreateToken(IdentityUser user, string roleName)
+    public string CreateToken(AppUser user, string roleName)
     {
         if (user is null || user.Email is null)
             return string.Empty;

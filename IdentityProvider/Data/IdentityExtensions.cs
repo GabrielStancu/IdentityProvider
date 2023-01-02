@@ -1,3 +1,4 @@
+using IdentityProvider.Models;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,7 +12,7 @@ public static class IdentityExtensions
             opt.UseSqlServer(
                 configuration.GetConnectionString("IdentityDb")
             ));
-        services.AddIdentity<IdentityUser, IdentityRole>(opt => {
+        services.AddIdentity<AppUser, IdentityRole>(opt => {
                 opt.SignIn.RequireConfirmedAccount = false;
                 opt.Password.RequireDigit = true;
                 opt.Password.RequireLowercase = true;

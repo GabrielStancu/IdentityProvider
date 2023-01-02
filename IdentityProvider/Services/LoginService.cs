@@ -1,5 +1,6 @@
 using AutoMapper;
 using IdentityProvider.Dtos;
+using IdentityProvider.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace IdentityProvider.Services;
@@ -11,15 +12,15 @@ public interface ILoginService
 
 public class LoginService : ILoginService
 {
-    private readonly UserManager<IdentityUser> _userManager;
-    private readonly SignInManager<IdentityUser> _signInManager;
+    private readonly UserManager<AppUser> _userManager;
+    private readonly SignInManager<AppUser> _signInManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ITokenService _tokenService;
     private readonly IMapper _mapper;
 
     public LoginService(
-        UserManager<IdentityUser> userManager,
-        SignInManager<IdentityUser> signInManager,
+        UserManager<AppUser> userManager,
+        SignInManager<AppUser> signInManager,
         RoleManager<IdentityRole> roleManager,
         ITokenService tokenService,
         IMapper mapper)
@@ -53,12 +54,11 @@ public class LoginService : ILoginService
         if (role is null || string.IsNullOrEmpty(role.Name))
             return null;
 
-        return new UserDto
-        {
-            Id = user.Id,
-            Email = user.Email!,
-            Token = _tokenService.CreateToken(user, role.Name),
-            Role = _mapper.Map<RoleDto>(role)
-        };
+        // Create the return user object
+        var loggedUser = _mapper.Map<UserDto>(user);
+        loggedUser.Token = _tokenService.CreateToken(user, role.Name);
+        loggedUser.Role = _mapper.Map<RoleDto>(role);
+
+        return loggedUser;
     }
 }

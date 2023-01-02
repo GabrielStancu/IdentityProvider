@@ -1,25 +1,24 @@
 using AutoMapper;
 using IdentityProvider.Dtos;
+using IdentityProvider.Models;
 using Microsoft.AspNetCore.Identity;
 
 namespace IdentityProvider.Services;
 
-public interface IAuthenticationService
+public interface IRegisterService
 {
     public Task<(UserDto? User, string Message)> RegisterAsync(RegisterDto registerDto);
-    public Task<bool> DeleteUserAsync(DeleteDto deleteDto);
-    public Task<bool> UserAlreadyExistsAsync(string email);
 }
 
-public class AuthenticationService : IAuthenticationService
+public class RegisterService : IRegisterService
 {
-    private readonly UserManager<IdentityUser> _userManager;
+    private readonly UserManager<AppUser> _userManager;
     private readonly RoleManager<IdentityRole> _roleManager;
     private readonly ITokenService _tokenService;
     private readonly IMapper _mapper;
 
-    public AuthenticationService(
-        UserManager<IdentityUser> userManager,
+    public RegisterService(
+        UserManager<AppUser> userManager,
         RoleManager<IdentityRole> roleManager,
         ITokenService tokenService,
         IMapper mapper)
@@ -45,10 +44,12 @@ public class AuthenticationService : IAuthenticationService
             return (null, "Invalid role");
 
         // Register the user
-        var user = new IdentityUser
+        var user = new AppUser
         {
             Email = registerDto.Email,
-            UserName = registerDto.Email
+            UserName = registerDto.Email,
+            FirstName = registerDto.FirstName,
+            LastName = registerDto.LastName
         };
         var result = await _userManager.CreateAsync(user, registerDto.Password);
 
@@ -61,31 +62,14 @@ public class AuthenticationService : IAuthenticationService
             return (null, string.Join(';', roleResult.Errors));
 
         // Create return object
-        var registeredUser = new UserDto
-        {
-            Id = user.Id,
-            Token = _tokenService.CreateToken(user, registerDto.RoleId),
-            Email = user.Email,
-            Role = _mapper.Map<RoleDto>(role)
-        };
+        var registeredUser = _mapper.Map<UserDto>(user);
+        registeredUser.Token = _tokenService.CreateToken(user, registerDto.RoleId);
+        registeredUser.Role = _mapper.Map<RoleDto>(role);
 
         return (registeredUser, string.Empty);
     }
-    public async Task<bool> DeleteUserAsync(DeleteDto deleteDto)
-    {
-        var user = await _userManager.FindByEmailAsync(deleteDto.Email);
-        if (user is null)
-            return false;
 
-        var isValidPassword = await _userManager.CheckPasswordAsync(user, deleteDto.Password);
-        if (!isValidPassword)
-            return false;
-
-        var result = await _userManager.DeleteAsync(user);
-        return result.Succeeded;
-    }
-
-    public async Task<bool> UserAlreadyExistsAsync(string email)
+    private async Task<bool> UserAlreadyExistsAsync(string email)
         => await _userManager.FindByEmailAsync(email) != null;
 
     private async Task<bool> RoleDoesNotExistAsync(string roleId)

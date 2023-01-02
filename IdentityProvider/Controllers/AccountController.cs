@@ -9,9 +9,9 @@ namespace IdentityProvider.Controllers;
 public class AccountController : ControllerBase
 {
     private readonly ILoginService _loginService;
-    private readonly IAuthenticationService _authenticationService;
+    private readonly IRegisterService _authenticationService;
 
-    public AccountController(ILoginService loginService, IAuthenticationService authenticationService)
+    public AccountController(ILoginService loginService, IRegisterService authenticationService)
     {
         _loginService = loginService;
         _authenticationService = authenticationService;
@@ -35,23 +35,5 @@ public class AccountController : ControllerBase
         var registerResult = await _authenticationService.RegisterAsync(registerDto);
 
         return registerResult.User ?? (ActionResult<UserDto>)BadRequest(registerResult.Message);
-    }
-
-    [HttpPost("delete")]
-    public async Task<ActionResult> Delete(DeleteDto deleteDto)
-    {
-        Console.WriteLine($"--> Deleting user {deleteDto.Email}...");
-
-        var deleted = await _authenticationService.DeleteUserAsync(deleteDto);
-
-        return deleted ? Ok() : BadRequest();
-    }
-
-    [HttpPost("exists/{email}")]
-    public async Task<ActionResult<bool>> UserExists(string email)
-    {
-        Console.WriteLine($"--> Checking if user {email} exists...");
-
-        return await _authenticationService.UserAlreadyExistsAsync(email);
     }
 }

@@ -6,11 +6,11 @@ namespace IdentityProvider.Services;
 
 public interface IRoleService
 {
-    public Task<IEnumerable<RoleDto>> AllRoles();
-    public Task<RoleDto> RoleById(string id);
-    public Task<RoleDto> RoleByName(string name);
-    public Task<RoleDto?> Register(string name);
-    public Task<bool> DeleteRole(string id);
+    public Task<IEnumerable<RoleDto>> RolesAsync();
+    public Task<RoleDto> FindByIdAsync(string id);
+    public Task<RoleDto> FindByNameAsync(string name);
+    public Task<RoleDto?> CreateAsync(string name);
+    public Task<bool> DeleteAsync(string id);
 }
 
 public class RoleService : IRoleService
@@ -23,7 +23,7 @@ public class RoleService : IRoleService
         _roleManager = roleManager;
         _mapper = mapper;
     }
-    public async Task<IEnumerable<RoleDto>> AllRoles()
+    public async Task<IEnumerable<RoleDto>> RolesAsync()
     {
         var roles = _roleManager.Roles?
             .Select(r => _mapper.Map<RoleDto>(r))
@@ -33,7 +33,7 @@ public class RoleService : IRoleService
         return await Task.FromResult(roles);
     }
 
-    public async Task<bool> DeleteRole(string id)
+    public async Task<bool> DeleteAsync(string id)
     {
         var role = await _roleManager.FindByIdAsync(id);
 
@@ -45,7 +45,7 @@ public class RoleService : IRoleService
         return true;
     }
 
-    public async Task<RoleDto?> Register(string name)
+    public async Task<RoleDto?> CreateAsync(string name)
     {
         var role = new IdentityRole(name);
         var result = await _roleManager.CreateAsync(role);
@@ -53,14 +53,14 @@ public class RoleService : IRoleService
         return result.Succeeded ? _mapper.Map<RoleDto>(role) : null;
     }
 
-    public async Task<RoleDto> RoleById(string id)
+    public async Task<RoleDto> FindByIdAsync(string id)
     {
         var role = await _roleManager.FindByIdAsync(id);
 
         return _mapper.Map<RoleDto>(role);
     }
 
-    public async Task<RoleDto> RoleByName(string name)
+    public async Task<RoleDto> FindByNameAsync(string name)
     {
         var role = await _roleManager.FindByNameAsync(name);
 
