@@ -35,9 +35,13 @@ public class LoginService : ILoginService
     public async Task<UserDto?> LoginAsync(LoginDto loginDto)
     {
         // Check the user exists
-        var user = await _userManager.FindByEmailAsync(loginDto.Email);
+        var user = await _userManager.FindByEmailAsync(loginDto.UserName);
         if (user == null)
-            return null;
+        {
+            user = await _userManager.FindByNameAsync(loginDto.UserName);
+            if (user is null)
+                return null;
+        }
 
         // Check the password
         var result = await _signInManager.CheckPasswordSignInAsync(user, loginDto.Password, false);

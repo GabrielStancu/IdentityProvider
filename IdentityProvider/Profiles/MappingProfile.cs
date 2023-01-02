@@ -12,5 +12,6 @@ public class MappingProfile : Profile
         CreateMap<IdentityRole, RoleDto>();
         CreateMap<AppUser, UserDto>();
         CreateMap<AppUser, UserInfoDto>();
+        CreateMap<RegisterDto, AppUser>();
     }
 }

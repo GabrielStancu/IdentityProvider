@@ -31,9 +31,18 @@ public class RegisterService : IRegisterService
 
     public async Task<(UserDto? User, string Message)> RegisterAsync(RegisterDto registerDto)
     {
+        // If client does not support UserNames, it is set as the Email address
+        if (string.IsNullOrEmpty(registerDto.UserName))
+        {
+            registerDto.UserName = registerDto.Email;
+        }
+
         // Validate the request
-        if(await UserAlreadyExistsAsync(registerDto.Email))
+        if(await EmailAlreadyInUseAsync(registerDto.Email))
             return (null, "Email address is in use.");
+
+        if(await UserNameAlreadyInUseAsync(registerDto.UserName))
+            return (null, "UserName is in use.");
 
         if (await RoleDoesNotExistAsync(registerDto.RoleId))
             return (null, "Assigned role does not exist.");
@@ -44,13 +53,7 @@ public class RegisterService : IRegisterService
             return (null, "Invalid role");
 
         // Register the user
-        var user = new AppUser
-        {
-            Email = registerDto.Email,
-            UserName = registerDto.Email,
-            FirstName = registerDto.FirstName,
-            LastName = registerDto.LastName
-        };
+        var user = _mapper.Map<AppUser>(registerDto);
         var result = await _userManager.CreateAsync(user, registerDto.Password);
 
         if (!result.Succeeded)
@@ -69,8 +72,11 @@ public class RegisterService : IRegisterService
         return (registeredUser, string.Empty);
     }
 
-    private async Task<bool> UserAlreadyExistsAsync(string email)
+    private async Task<bool> EmailAlreadyInUseAsync(string email)
         => await _userManager.FindByEmailAsync(email) != null;
+
+    private async Task<bool> UserNameAlreadyInUseAsync(string userName)
+        => await _userManager.FindByNameAsync(userName) != null;
 
     private async Task<bool> RoleDoesNotExistAsync(string roleId)
         => await _roleManager.FindByIdAsync(roleId) is null;

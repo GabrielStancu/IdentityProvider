@@ -20,7 +20,7 @@ public class AccountController : ControllerBase
     [HttpPost("login")]
     public async Task<ActionResult<UserDto>> Login(LoginDto loginDto)
     {
-        Console.WriteLine($"--> Authenticating user {loginDto.Email}...");
+        Console.WriteLine($"--> Authenticating user {loginDto.UserName}...");
 
         var user = await _loginService.LoginAsync(loginDto);
 
@@ -30,7 +30,7 @@ public class AccountController : ControllerBase
     [HttpPost("register")]
     public async Task<ActionResult<UserDto>> Register(RegisterDto registerDto)
     {
-        Console.WriteLine($"--> Registering user {registerDto.Email}...");
+        Console.WriteLine($"--> Registering user {registerDto.UserName}...");
 
         var registerResult = await _authenticationService.RegisterAsync(registerDto);
 

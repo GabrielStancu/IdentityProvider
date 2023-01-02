@@ -10,7 +10,7 @@ public interface IUserService
     public Task<IEnumerable<UserInfoDto>> GetUsersAsync();
     public Task<IEnumerable<UserInfoDto>> GetUsersInRoleAsync(string roleName);
     public Task<bool> DeleteUserAsync(DeleteDto deleteDto);
-    public Task<bool> UserAlreadyExistsAsync(string email);
+    public Task<bool> UserAlreadyExistsAsync(string userName);
 }
 
 public class UserService : IUserService
@@ -43,20 +43,31 @@ public class UserService : IUserService
 
     public async Task<bool> DeleteUserAsync(DeleteDto deleteDto)
     {
-        var user = await _userManager.FindByEmailAsync(deleteDto.Email);
+        var user = await _userManager.FindByNameAsync(deleteDto.UserName);
         if (user is null)
-            return false;
+        {
+            user = await _userManager.FindByEmailAsync(deleteDto.UserName);
+            if (user is null)
+            {
+                Console.WriteLine($"--> User {deleteDto.UserName} does not exist.");
+                return false;
+            }
+        }
 
         var isValidPassword = await _userManager.CheckPasswordAsync(user, deleteDto.Password);
         if (!isValidPassword)
+        {
+            Console.WriteLine($"--> Invalid credentials for deleting the user {deleteDto.UserName}");
             return false;
+        }
 
         var result = await _userManager.DeleteAsync(user);
         return result.Succeeded;
     }
 
-    public async Task<bool> UserAlreadyExistsAsync(string email)
-        => await _userManager.FindByEmailAsync(email) != null;
+    public async Task<bool> UserAlreadyExistsAsync(string userName)
+        => await _userManager.FindByNameAsync(userName) != null ||
+           await _userManager.FindByEmailAsync(userName) != null;
 
     private async Task<string> UserRoleAsync(string userId)
     {

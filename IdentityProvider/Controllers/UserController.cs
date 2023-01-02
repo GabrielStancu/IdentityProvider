@@ -38,18 +38,20 @@ public class UserController : ControllerBase
     [HttpPost("delete")]
     public async Task<ActionResult> Delete(DeleteDto deleteDto)
     {
-        Console.WriteLine($"--> Deleting user {deleteDto.Email}...");
+        Console.WriteLine($"--> Deleting user {deleteDto.UserName}...");
 
         var deleted = await _userService.DeleteUserAsync(deleteDto);
 
-        return deleted ? Ok() : BadRequest();
+        return deleted
+            ? Ok("User successfully deleted.")
+            : BadRequest("Invalid credentials. Could not delete the user.");
     }
 
-    [HttpPost("exists/{email}")]
-    public async Task<ActionResult<bool>> UserExists(string email)
+    [HttpPost("exists/{userName}")]
+    public async Task<ActionResult<bool>> UserExists(string userName)
     {
-        Console.WriteLine($"--> Checking if user {email} exists...");
+        Console.WriteLine($"--> Checking if user {userName} exists...");
 
-        return await _userService.UserAlreadyExistsAsync(email);
+        return await _userService.UserAlreadyExistsAsync(userName);
     }
 }
