@@ -8,6 +8,13 @@ builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 builder.Services.AddIdentity(builder.Configuration);
 builder.Services.AddAutoMapper(AppDomain.CurrentDomain.GetAssemblies());
+builder.Services.AddCors(opt => {
+    opt.AddPolicy(name: "AllowOrigins", builder => {
+        builder.AllowAnyOrigin()
+               .AllowAnyHeader()
+               .AllowAnyMethod();
+    });
+});
 builder.Services.AddServices();
 
 var app = builder.Build();
@@ -16,6 +23,7 @@ app.UseSwagger();
 app.UseSwaggerUI();
 app.UseHttpsRedirection();
 app.UseRouting();
+app.UseCors("AllowOrigins");
 app.UseAuthentication();
 app.UseAuthorization();
 app.MapControllers();
